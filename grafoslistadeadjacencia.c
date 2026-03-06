@@ -4,53 +4,129 @@
 #define TRUE 1
 #define FALSE 0
 
-typedef bool int;
+typedef int Bool;
 
-
-//Struct das arestas
 typedef struct s{
     int adj;
     struct s* prox;
 }No;
 
-//Struct do vértice
 typedef struct{
     No* inicio;
-}VERTICE; 
+}VERTICE;
 
-//Função para inicializar o grafo
-void inicializar(VERTICE* g, int v){
-    for(int i = 0; i < v; i++) 
-        g[i].inicio = NULL; //Aponta para nulo todos os vértices
+void inicializarGrafo(VERTICE* g, int v){
+    for(int i = 0; i < v; i++)
+        g[i].inicio = NULL;
 }
 
-//Função para verificar se uma relação entre dois vértices existe
-bool arestaExiste(VERTICE *g, int v1, int v2){
-    No* p = g[v1].inicio; //Parte do vértice inicial
-    while(p){ //Itera pelos adjacentes
-        if(p->adj == v2) //Se um adjacente do vértice v1 for o v2, então eles são adjacentes
+Bool arestaExiste(VERTICE* g, int v1, int v2){
+    No* p = g[v1].inicio;
+    while(p){
+        if(p->adj == v2){
+            free(p);
             return TRUE;
-        p = p->prox; //Passa para o próximo vértice
+        }
+        p = p->prox;
     }
     return FALSE;
 }
 
-//Função para adicionar uma relação
-bool inserirAresta(VERTICE* g, int v1, int v2){
-    if(arestaExiste(g, v1, v2)) //Se a aresta já existe
+Bool adicionarAresta(VERTICE* g, int v1, int v2){
+    if(arestaExiste(g, v1, v2))
         return FALSE;
-    No* novo = (No*)malloc(sizeof(No)); //Cria uma nova aresta para ligar os vértices
-    novo->adj = v2; //Adiciona o valor de v2 como adjacente a aresta
-    novo->prox = g[v1].inicio //Coloca que o novo vértice irá apontar para o que o primeiro vértice estava apontando
-    g[v1].inicio = novo; //Define o novo inicio sendo a nova aresta adicionada
+    No* novo = (No*) malloc(sizeof(No));
+    novo->adj = v2;
+    novo->prox = g[v1].inicio;
+    g[v1].inicio = novo;
+
     return TRUE;
 }
 
-int main(){
-    int v; //Número de vértices do grafo
-    scanf("%d", &v);
+Bool removerAresta(VERTICE* g, int v1, int v2){
+    No* p = g[v1].inicio;
+    No* ant;
+    if(p->adj == v2){
+        g[v1].inicio = p->prox;
+        free(p);
+        return TRUE;
+    }
+    ant = p;
+    p = p->prox;
+    while(p){
+        if(p->adj == v2){
+            ant->prox = p->prox;
+            free(p);
+            return TRUE;
+        }
+        ant = p;
+        p = p->prox;
+    }
+    return FALSE;
+}
 
-    VERTICE *g = (VERTICE*) malloc(v*sizeof(VERTICE)); //Alocando o grafo
-    inicializar(g, v);
+void imprimirGrafo(VERTICE *g, int v){
+    No* p;
+    for(int i = 0; i < v; i++){
+        printf("G[%d]: ", i);
+        p = g[i].inicio;
+        while(p){
+            printf("%d -> ",p->adj);
+            p = p->prox;
+        }
+        printf("\\");
+        printf("\n");
+    }
+    free(p);
+}
+
+VERTICE* grafoTransposto(VERTICE* g, int v){
+    VERTICE* gt = (VERTICE*)malloc(v * sizeof(VERTICE));
+    inicializarGrafo(gt, v);
+
+    for(int i = 0; i < v; i++){
+        No* p = g[i].inicio;
+        while(p){
+            No* novo = (No*)malloc(sizeof(No));
+            novo->adj = i;
+            novo->prox = gt[p->adj].inicio;
+            gt[p->adj].inicio = novo;
+
+            p = p->prox;
+        }   
+    }
+    return gt;
+}
+
+int main(){
+    int v;
+    scanf("%d",&v);
+    VERTICE* g = (VERTICE*) malloc(v * sizeof(VERTICE));
+    VERTICE* gt = (VERTICE*)malloc(v * sizeof(VERTICE));
+
+    inicializarGrafo(g, v);
+    //adicionarAresta(g, x, y);
+    //removerAresta(g, x, y);
+    //imprimirGrafo(g, v);
+
+    adicionarAresta(g, 0 , 3);
+    adicionarAresta(g, 0 , 2);
+    adicionarAresta(g, 0 , 1);
+    adicionarAresta(g, 1 , 1);
+    adicionarAresta(g, 1 , 2);
+    adicionarAresta(g, 1 , 3);
+    adicionarAresta(g, 2 , 0);
+    adicionarAresta(g, 3 , 1);
+    adicionarAresta(g, 3 , 0);
+
+    imprimirGrafo(g, v);
+
+    printf("\n\n");
+
+    gt = grafoTransposto(g, v);
+    imprimirGrafo(gt,v);
+
     return 0;
 }
+
+
