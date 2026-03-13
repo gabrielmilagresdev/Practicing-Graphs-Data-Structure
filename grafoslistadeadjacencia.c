@@ -16,11 +16,22 @@ typedef struct{
     No* inicio;
 }VERTICE;
 
+//Função para imprimir um grafo em matriz (Usada para a função de conversão)
+void imprimirGrafoM(int **m, int v){
+    for(int i = 0; i < v; i++){
+        for(int j = 0; j < v; j++)
+            printf("%d ", m[i][j]);
+        printf("\n");
+    }
+}
+
+//Função para inicializar um grafo da maneira correta
 void inicializarGrafo(VERTICE* g, int v){
     for(int i = 0; i < v; i++)
         g[i].inicio = NULL;
 }
 
+//Função para verificar a existência de uma aresta em um grafo
 Bool arestaExiste(VERTICE* g, int v1, int v2){
     No* p = g[v1].inicio;
     while(p){
@@ -33,6 +44,7 @@ Bool arestaExiste(VERTICE* g, int v1, int v2){
     return FALSE;
 }
 
+//Função para adicionar arestas em um grafo
 Bool adicionarAresta(VERTICE* g, int v1, int v2){
     if(arestaExiste(g, v1, v2))
         return FALSE;
@@ -44,6 +56,7 @@ Bool adicionarAresta(VERTICE* g, int v1, int v2){
     return TRUE;
 }
 
+//Função para remover arestas de um grafo
 Bool removerAresta(VERTICE* g, int v1, int v2){
     No* p = g[v1].inicio;
     No* ant;
@@ -66,6 +79,7 @@ Bool removerAresta(VERTICE* g, int v1, int v2){
     return FALSE;
 }
 
+//Função para imprimir o grafo
 void imprimirGrafo(VERTICE *g, int v){
     No* p;
     for(int i = 0; i < v; i++){
@@ -81,6 +95,7 @@ void imprimirGrafo(VERTICE *g, int v){
     free(p);
 }
 
+//Função para transpor um grafo
 VERTICE* grafoTransposto(VERTICE* g, int v){
     VERTICE* gt = (VERTICE*)malloc(v * sizeof(VERTICE));
     inicializarGrafo(gt, v);
@@ -99,9 +114,32 @@ VERTICE* grafoTransposto(VERTICE* g, int v){
     return gt;
 }
 
+//Função para converter uma lista de adjacência em matriz
+int** listaParaMatriz(VERTICE* g, int v){
+    if(!g)
+        return NULL;
+    //Inicializando a matriz
+    int** m = (int**) malloc(v * sizeof(int*));
+    for(int i = 0; i < v; i++){
+        m[i] = (int*) malloc (v *sizeof(int));
+    }
+    for(int i = 0; i < v; i++)
+        for(int j = 0; j < v; j++)
+            m[i][j] = 0;
+    //Iterando pela lista e copiando os valores para a matriz
+    for(int i = 0; i < v; i++){
+        No* p;
+        p = g[i].inicio;
+        while(p){
+            m[i][p->adj] = 1;
+            p = p->prox;
+        }
+    }
+    return m;
+}
+
 int main(){
-    int v;
-    scanf("%d",&v);
+    int v = 4;
     VERTICE* g = (VERTICE*) malloc(v * sizeof(VERTICE));
     VERTICE* gt = (VERTICE*)malloc(v * sizeof(VERTICE));
 
@@ -124,8 +162,17 @@ int main(){
 
     printf("\n\n");
 
-    gt = grafoTransposto(g, v);
-    imprimirGrafo(gt,v);
+    //gt = grafoTransposto(g, v);
+    //imprimirGrafo(gt,v);
+
+    /*
+    int** m = (int**) malloc(v * sizeof(int*));
+    for(int i = 0; i < v; i++){
+        m[i] = (int*) malloc (v *sizeof(int));
+    }
+    m = listaParaMatriz(g,v);
+    imprimirGrafoM(m,v);
+    */
 
     return 0;
 }
