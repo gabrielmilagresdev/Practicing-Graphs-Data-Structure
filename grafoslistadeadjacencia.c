@@ -14,6 +14,7 @@ typedef struct s{
 
 typedef struct{
     No* inicio;
+    int flag;
 }VERTICE;
 
 //Função para imprimir um grafo em matriz (Usada para a função de conversão)
@@ -138,8 +139,42 @@ int** listaParaMatriz(VERTICE* g, int v){
     return m;
 }
 
+
+//Função para zerar as flags antes de uma busca em profundidade
+Bool zerarFlags(VERTICE* g, int v){
+    if(!g)
+        return FALSE;
+    for(int i = 0; i < v; i++){
+        g[i].flag = 0;
+    }
+    return TRUE;
+}
+
+//Função para imprimir as flags de um grafo
+void imprimirFlags(VERTICE* g, int v){
+    for(int i = 0; i < v; i++){
+        printf("G[%d]: %d", i,g[i].flag);
+        printf("\n");
+    }
+}
+
+//Função da busca em profundidade em listas de adjacência a partir de um vértice "a"
+Bool prof(VERTICE* g, int v, int a){
+    if(!g)
+        return FALSE;
+    g[a].flag = 1;
+    No* p = g[a].inicio;
+    while(p){
+        if(g[p->adj].flag == 0)
+            prof(g,v,p->adj);
+        p = p->prox;
+    }
+    g[a].flag = 2;
+    return TRUE;
+}
+
 int main(){
-    int v = 4;
+    int v = 8;
     VERTICE* g = (VERTICE*) malloc(v * sizeof(VERTICE));
     VERTICE* gt = (VERTICE*)malloc(v * sizeof(VERTICE));
 
@@ -148,15 +183,16 @@ int main(){
     //removerAresta(g, x, y);
     //imprimirGrafo(g, v);
 
-    adicionarAresta(g, 0 , 3);
-    adicionarAresta(g, 0 , 2);
     adicionarAresta(g, 0 , 1);
-    adicionarAresta(g, 1 , 1);
-    adicionarAresta(g, 1 , 2);
+    adicionarAresta(g, 0 , 3);
     adicionarAresta(g, 1 , 3);
-    adicionarAresta(g, 2 , 0);
-    adicionarAresta(g, 3 , 1);
-    adicionarAresta(g, 3 , 0);
+    adicionarAresta(g, 2 , 3);
+    adicionarAresta(g, 2 , 1);
+    adicionarAresta(g, 2 , 7);
+    adicionarAresta(g, 3 , 4);
+    adicionarAresta(g, 4 , 2);
+    adicionarAresta(g, 5 , 6);
+    adicionarAresta(g, 6 , 5);
 
     imprimirGrafo(g, v);
 
@@ -173,6 +209,10 @@ int main(){
     m = listaParaMatriz(g,v);
     imprimirGrafoM(m,v);
     */
+   zerarFlags(g,v);
+   prof(g,v,0);
+   imprimirFlags(g,v);
+   
 
     return 0;
 }

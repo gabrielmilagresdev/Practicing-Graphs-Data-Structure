@@ -14,6 +14,7 @@ typedef struct s{
 
 typedef struct{
     No* inicio;
+    int flag;
 }VERTICE;
 
 //Função para imprimir um grafo em lista de adjacência (Para a função de conversão entre as estruturas)
@@ -114,7 +115,6 @@ VERTICE* matrizParaLista(int **m, int v){
     return g;
 }
 
-
 int main(){
     //Tamanho da matriz quadrada
     int v = 5;
@@ -141,6 +141,6 @@ int main(){
     imprimirGrafoLA(g,v);
     */
 
-    
+
 
 }
