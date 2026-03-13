@@ -6,6 +6,7 @@
 
 typedef int Bool;
 
+//Struct da lista de adjacência
 typedef struct s{
     int adj;
     struct s* prox;
