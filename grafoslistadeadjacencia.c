@@ -374,9 +374,9 @@ Bool entrarFila(FILA* f, int i){
 }
 
 //Função para tirar um valor da fila
-Bool sairFila(FILA* f){
+int sairFila(FILA* f){
     if(!f || f->ini == NULL)
-        return FALSE;
+        return;
 
     No* p = f->ini;
     f->ini = p->prox;
@@ -384,36 +384,36 @@ Bool sairFila(FILA* f){
     if(f->ini == NULL) //Fila ficou vazia
         f->fim = NULL;
 
+    int valor = f->ini->adj;
+
     free(p);
 
-    return TRUE;
+    return valor;
 }
 
+//Função de Busca em Largura (PRECISA ARRUMAR!)
 Bool largura(VERTICE* g, int v, int i){
     if(!g)
         return FALSE;
 
     zerarFlags(g,v);
-    FILA* f;
+    FILA* f = (FILA*) malloc(sizeof(FILA));
     inicializarFila(f);
 
     g[i].flag = 1;
     entrarFila(f,i);
 
-    No* p = g[i].inicio;
-
-    while(f->ini){         
-        if(p == NULL){
-            sairFila(f);
-            g[f->ini].flag = 2;
-            p = g[f->ini].inicio;
+    while(f->ini){
+        int j = sairFila(f,i);
+        No* p = g[j].inicio;
+        while(p){
+            if(g[p->adj].flag == 0){
+                g[p->adj].flag = 1;
+                entrarFila(f,p->adj);
+            }
+            p = p->adj;
         }
-
-        if(g[p->adj].flag == 0){
-            g[p->adj].flag = 1;
-            entrarFila(f,p->adj);
-        }
-        p = p->prox;
+        g[j].flag = 2;
     }
 
     return TRUE;

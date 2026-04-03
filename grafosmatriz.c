@@ -17,6 +17,11 @@ typedef struct{
     int flag;
 }VERTICE;
 
+typedef struct{
+    No* ini;
+    No* fim; 
+}FILA;
+
     
 //Função para imprimir um grafo em lista de adjacência (Para a função de conversão entre as estruturas)
 void imprimirGrafoLA(VERTICE *g, int v){
@@ -144,6 +149,82 @@ Bool prof(int**m, int v, int a, int* vetorFlags){
             prof(m,v,i,vetorFlags);
     }
     return TRUE;
+}
+
+//Função para inicializar a fila
+Bool inicializarFila(FILA* f){
+    if(!f)
+        return FALSE;
+
+    f->ini = NULL;
+    f->fim = NULL;
+
+    return TRUE;
+}
+
+//Função para entrar um valor na fila
+Bool entrarFila(FILA* f, int i){
+    if(!f)
+        return FALSE;
+
+    No* p = (No*) malloc(sizeof(No));
+    p->prox = NULL;
+    p->adj = i;
+
+    if(f->fim == NULL){ //Fila vazia
+        f->ini = p;
+        f->fim = p;
+    }else{
+        f->fim->prox = p;
+        f->fim = p;
+    }
+
+    return TRUE;
+}
+
+//Função para tirar um valor da fila
+int sairFila(FILA* f){
+    if(!f || f->ini == NULL)
+        return;
+
+    No* p = f->ini;
+    f->ini = p->prox;
+
+    if(f->ini == NULL) //Fila ficou vazia
+        f->fim = NULL;
+
+    int valor = f->ini->adj;
+
+    free(p);
+
+    return valor;
+}
+
+//Busca em largura em matriz
+Bool largura(int** m, int v, int i){
+    if(!m)
+        return FALSE;
+
+    int* vetorFlags = (int*)malloc(sizeof(vetorFlags));
+    zerarFlags(vetorFlags, v);
+
+    FILA* f = (FILA*)malloc(sizeof(FILA));
+    inicializar(f);
+
+    vetorFlags[i] = 1;
+    entrarFila(f,i);
+
+    while(f->ini){
+        int j = sairFila(f);
+
+        for(int w = 0; w < v; w++){
+            if(m[j][w] == 1 && vetorFlags[w] == 0){
+                vetorFlags[w] = 1;
+                entrarFila(f,w);
+            }
+        }
+        vetorFlags[j] = 2;
+    }
 }
 
 int main(){
