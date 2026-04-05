@@ -227,6 +227,35 @@ Bool largura(int** m, int v, int i){
     }
 }
 
+//Ex4: Qual o custo do caminho mais curto de i para os demais vértices? (PRECISA DE AJUSTES)
+void custo(int** m, int v, int i, int* custos){
+    for(int j = 0; j < v; j++){
+        if(j == i)
+            custos[j] = 0
+        else
+            custos[j] = INFINITY;
+    }
+
+    int* flag = (int*) malloc(v * sizeof(int));
+    FILA* f = (FILA*) malloc(sizeof(Fila));
+    inicializarFila(f);
+    zerarFlags(flag, v);
+
+    flag[i] = 1;
+
+    while(f->ini){
+        int j = sairFila(f);
+
+        for(int w = 0; w < v; w++){
+            if(flag[j] == 0 && m[j][w] > 0){
+                flag[j] = 1;
+                custos[w] = custos[j] + m[j][w]; 
+            }
+        }
+        flag[j] = 2;
+    }
+}
+
 int main(){
     //Tamanho da matriz quadrada
     int v = 8;

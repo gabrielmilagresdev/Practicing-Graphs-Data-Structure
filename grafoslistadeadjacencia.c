@@ -3,6 +3,7 @@
 
 #define TRUE 1
 #define FALSE 0
+#define INFINITY 2000000000
 
 typedef int Bool;
 
@@ -22,12 +23,19 @@ typedef struct{
     No* inicio;
     int flag;
     int tipo;
+    int via;
 }VERTICE_TIPO;
 
 typedef struct{
     No* ini;
     No* fim; 
 }FILA;
+
+typedef struct{
+    No* inicio;
+    int flag;
+    int dist;
+}VERTICE_DIST;
 
 //Função para imprimir um grafo em matriz (Usada para a função de conversão)
 void imprimirGrafoM(int **m, int v){
@@ -419,6 +427,202 @@ Bool largura(VERTICE* g, int v, int i){
     return TRUE;
 }
 
+/*
+ Ex: Encontrar o posto de gasolina mais próximo. Dado vértices de 
+ diversos tipos(posto,escola,casa), a partir de um vértice, 
+ encontre o vértice com o tipo posto mais próximo
+*/
+int tipoXMaisProximo(VERTICE_TIPO* g, int v, int i, int tipox){
+    if(!g)
+        return -1;
+
+    FILA* f = (FILA*) malloc(sizeof(FILA));
+    inicializarFila(f);
+    zerarFlags(g,v);
+
+    if(g[i].tipo == tipox)
+        return i;
+
+    entrarFila(f,i);
+    g[i].flag = 1;
+
+
+    while(f->ini){
+        int j = sairFila(f);
+        No* p = g[j].inicio;
+
+        while(p){
+            if(g[p->adj].tipo == tipox)
+                free(f);
+                return p->adj;
+
+            if(g[p->adj].flag == 0){
+                g[p->adj].flag = 1;
+                entrarFila(f,p->adj);
+            }
+
+            p = p->prox;
+        }
+        g[j].flag = 2;
+    }
+
+    free(f);
+    return -1;
+}
+
+//Ex2: Qual o comprimento do caminho mais curto entre v1 e v2 (contada em quantidade de arestas)?
+int comprimento(VERTICE_DIST* g, int v, int v1, int v2){
+    if(!g)
+        return -1;
+
+    zerarFlags(g,v);
+
+    for(int i = 0; i < v; i++){
+        g[i].dist = INFINITY;
+    }
+
+    g[v1].dist = 0;
+    g[v1].flag = 1;
+
+    FILA* f = (FILA*) malloc(sizeof(Fila));
+    inicializarFila(f);
+
+    while(f->ini){
+        int j = sairFila(f);
+        if(j == v2){
+            free(f);
+            return g[j].dist;
+        }
+        No* p = g[j].inicio;
+        while(p){
+            if(g[p->adj].flag == 0){
+                g[j].flag = 1;
+                entrarFila(f, p->adj);
+                g[p->adj].dist = g[j].dist + 1;
+            } 
+            p = p->prox;
+        }
+        g[j].flag = 2;
+    }
+    return INFINITY;
+}
+
+
+// Ex2: Criar uma lista com todos elementos em um raio N a partir de i:
+No* verticesRaioN(VERTICE_DIST* g, int v, int N, int i){
+    if(!g)
+        return NULL;
+
+    for(int j = 0; j < v; j++){
+        if(j == i)
+            g[j].dist = 0;
+        else
+            g[j].dist = INFINITY;
+    }
+
+    FILA* f = (FILA*) malloc(sizeof(FILA));
+    inicializarFila(f);
+    zerarFlags(g, v);
+
+    g[i].flag = 1;
+    entrarFila(f, i);
+
+    No* resp = NULL;
+
+    while(f->ini){
+        int w = sairFila(f);
+        No* p = g[w].inicio;
+
+        while(p){
+            if(g[p->adj].flag == 0){
+                int novaDist = g[w].dist + 1;
+
+                if(novaDist <= N){
+                    g[p->adj].dist = novaDist;
+                    entrarFila(f, p->adj);
+                    g[p->adj].flag = 1;
+                }
+            }
+            p = p->prox;
+        }
+
+        g[w].flag = 2;
+
+        No* novo = (No*) malloc(sizeof(No));
+        novo->adj = w;
+        novo->prox = resp;
+        resp = novo;
+    }
+
+    free(f);
+    return resp;
+}
+
+//Problema: Conseguir descobrir o caminho entre dois vértices v1 e v2
+Bool caminhoVertices(VERTICE_DIST* g, No**  caminho, int i, int v1){
+    if(!g || !caminho)
+        return FALSE;
+
+    if(i == v1)
+        return TRUE;
+
+    No* novo = (No*) malloc(sizeof(No));
+
+    novo->adj = i;
+    novo->prox = *caminho;
+    *caminho = novo;
+
+    caminhoVertices(g, caminho, g[i].via, v1);
+
+    return TRUE;
+}
+
+No* viaVertices(VERTICE_DIST* g, int v, int v1, int v2){
+    if(!g)
+        return NULL;
+
+    for(int i = 0; i < v; i++){
+        if(i == v1)
+            g[i].dist = 0;
+        else
+            g[i].dist = INFINITY;
+    }
+
+    FILA* f = (FILA*) malloc(sizeof(FILA));
+    inicializarFila(f);
+
+    zerarFlags(g,v);
+    g[v1].flag = 1;
+    entrarFila(f, v1);
+
+    No* caminho = NULL;
+
+    while(f->ini){
+        int j = sairFila(f);
+        No* p = g[j].inicio;
+
+        if(j == v2){
+            free(f);
+            caminhoVertices(g, &caminho, v2, v1);
+            break;
+        }
+
+        while(p){
+            if(g[p->adj].flag == 0){
+                g[p->adj].flag = 1;
+                g[p->adj].via = j;
+                entrarFila(f, p->adj);
+            }
+            p = p->prox;
+        }
+        g[j].flag = 2;
+    }
+
+    
+    return caminho;
+}
+
+//Main
 int main(){
     int v = 17;
     VERTICE* g = (VERTICE*) malloc(v * sizeof(VERTICE));
